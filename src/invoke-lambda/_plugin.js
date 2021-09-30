@@ -2,7 +2,7 @@ let read = require('@architect/inventory/src/read')
 let defaultFunctionConfig = require('@architect/inventory/src/defaults/function-config')
 let invoker = require('./')
 
-module.exports = function invokePluginFunction (params, { src, payload }, callback) {
+exports.invokePluginFunction = function(params, { src, payload }, callback) {
   invoker({
     event: payload,
     lambda: {
@@ -12,6 +12,19 @@ module.exports = function invokePluginFunction (params, { src, payload }, callba
     },
     ...params,
   }, callback)
+}
+
+exports.plugin = {
+  hasRuntime: function({config, inv}) {
+    return Object.values(inv._project.plugins).
+      map(pluginModule => pluginModule?.sandbox?.runtime || null).
+      filter(runtime => runtime.name === config.runtime).length > 0
+  },
+  getRuntime: function({config, inv}) {
+    return Object.values(inv._project.plugins).
+      map(pluginModule => pluginModule?.sandbox?.runtime || null).
+      find(runtime => runtime.name === config.runtime)
+  } 
 }
 
 // compile any per-function config.arc customizations

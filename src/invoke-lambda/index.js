@@ -7,13 +7,14 @@ let exec = require('./exec')
 let warn = require('./warn')
 let missingRuntime = require('./missing-runtime')
 
+let {plugin} = require('../invoke-lambda/_plugin')
 let serialize = i => chalk.dim(JSON.stringify(i, null, 2))
 
 module.exports = function invokeLambda (params, callback) {
   let { apiType, cwd, event, inventory, lambda, staticPath, update } = params
-
+  let { inv } = inventory
   // handlerFile is defined for all non-ASAP functions; ASAP bypasses this check
-  if (!hasHandler(lambda)) {
+  if (!hasHandler(lambda, inventory)) {
     callback(Error('lambda_not_found'))
   }
   else {
@@ -43,11 +44,12 @@ module.exports = function invokeLambda (params, callback) {
       if (chonky) update.verbose.status('Truncated event payload log at 10KB')
 
       let run
-      if (runtime.startsWith('nodejs')) run = 'node'
-      if (runtime.startsWith('deno'))   run = 'deno'
-      if (runtime.startsWith('python')) run = 'python'
-      if (runtime.startsWith('ruby'))   run = 'ruby'
-      if (arcStaticAssetProxy)          run = 'asap'
+      if (runtime.startsWith('nodejs'))     run = 'node'
+      if (runtime.startsWith('deno'))       run = 'deno'
+      if (runtime.startsWith('python'))     run = 'python'
+      if (runtime.startsWith('ruby'))       run = 'ruby'
+      if (arcStaticAssetProxy)              run = 'asap'
+      if (plugin.hasRuntime({config, inv})) run = plugin.getRuntime({config, inv}).name
       if (!run) {
         missingRuntime({ cwd, runtime, src, update })
         return callback('Missing runtime')
@@ -86,11 +88,23 @@ module.exports = function invokeLambda (params, callback) {
 }
 
 // Handle multi-handler exploration here
-function hasHandler (lambda) {
+function hasHandler (lambda, inventory) {
   let { src, handlerFile, arcStaticAssetProxy, _skipHandlerCheck } = lambda
+  let { inv } = inventory
   // We don't need to do a handlerFile check if it's an ASAP / Arc 6 greedy root req
   if (arcStaticAssetProxy || _skipHandlerCheck) return true
   let { runtime } = lambda.config
+  if (plugin.hasRuntime({config: lambda.config, inv})) {
+    let found = false
+    let paths = [
+      join(src, plugin.getRuntime({config: lambda.config, inv}).functionHandler)
+    ]
+    paths.forEach(p => {
+      if (found) return
+      if (existsSync(p)) found = p
+    })
+    return found
+  }
   if (runtime === 'deno') {
     let found = false
     let paths = [

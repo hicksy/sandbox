@@ -2,6 +2,7 @@ let { sep } = require('path')
 let _asap = require('@architect/asap')
 let load = require('./_loader')
 let spawn = require('./spawn')
+let {plugin} = require('./_plugin')
 
 let runtimes = {
   deno: function (params, bootstrap) {
@@ -52,8 +53,13 @@ module.exports = function exec (run, params, callback) {
       .catch(callback)
   }
   else {
-    let bootstrap = load()[run]
-    let { command, args } = runtimes[run](params, bootstrap)
+    let isCustom = false
+    let custom = plugin.getRuntime({config: {runtime: run}, inv: params.context.inventory.inv})
+    if(typeof custom !== 'undefined') {
+      isCustom = true
+    }
+    let bootstrap = load(params.context.inventory)[run]
+    let { command, args } =  (isCustom) ? custom.exec(params, bootstrap) : runtimes[run](params, bootstrap)
     spawn({ command, args, ...params }, callback)
   }
 }

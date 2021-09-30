@@ -3,7 +3,8 @@ let { join } = require('path')
 let lTrimm = l => l.trim() !== '' // boom
 let handlers
 
-module.exports = function () {
+module.exports = function (inventory) {
+  let {inv} = inventory
   if (handlers) return handlers
   handlers = {}
   let runtimes = [ 'deno.js', 'node.js', 'python.py', 'ruby.rb' ]
@@ -32,5 +33,15 @@ module.exports = function () {
       throw Error(err)
     }
   })
+  if (inv._project.plugins) {
+    Object.values(inv._project.plugins).
+    map(pluginModule => pluginModule?.sandbox?.runtime || null).
+    filter(runtime => runtime).
+    map(runtime => {
+      if(runtime.name?.length && runtime.handler?.length) {
+        handlers[runtime.name] = runtime.handler
+      }
+    })
+  }
   return handlers
 }
