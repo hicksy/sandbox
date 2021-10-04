@@ -79,6 +79,29 @@ module.exports = function _start (params, callback) {
     // Kick off any plugin sandbox services
     function _plugins (callback) {
       if (inv._project.plugins) {
+        //validate plugins [wip]
+        Object.entries(inv._project.plugins).forEach(([pluginName, plugin]) => {
+          if(typeof plugin.sandbox !== 'undefined') {
+            
+            let willLoadSanboxHooks = true
+
+            if(typeof plugin.sandbox.start !== 'undefined') {
+              if(plugin.sandbox.start.constructor.name !== 'AsyncFunction' && plugin.sandbox.start.constructor.name !== 'Function') {
+                update.error(`@plugins: Failed to load ${pluginName} sandbox hooks. 'sandbox.start' must be a function `)
+                willLoadSanboxHooks = false
+              }
+              if(typeof plugin.sandbox.end === 'undefined' || (plugin.sandbox.end.constructor.name !== 'AsyncFunction' && plugin.sandbox.end.constructor.name !== 'Function')) {
+                update.error(`@plugins: Failed to load ${pluginName} sandbox hooks. 'sandbox.end' function must be defined when using 'sandbox.start'`)
+                willLoadSanboxHooks = false
+              }
+            }
+
+            if(willLoadSanboxHooks) {
+              update.done(`@plugins ${pluginName} sandbox hooks loaded`)
+            }
+          }
+        });
+
         let pluginServices = Object.values(inv._project.plugins).
           map(pluginModule => pluginModule?.sandbox?.start || null).
           filter(start => start).
