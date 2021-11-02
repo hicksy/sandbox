@@ -1,6 +1,6 @@
 exports.handler = async (event) => {
   const body = event
-  body.message = 'Hello from get /nodejs10.x (running nodejs10.x)'
+  body.message = 'Hello from get /nodejs14.x (running nodejs14.x)'
   return {
     statusCode: 200,
     headers: { 'content-type': 'application/json' },

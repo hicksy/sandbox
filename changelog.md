@@ -2,6 +2,42 @@
 
 ---
 
+## [4.2.2] 2021-10-20
+
+### Changed
+
+- Updated dependencies
+
+---
+
+## [4.2.🍁 - 4.2.1] 2021-10-05
+
+### Added
+
+- Added Lambda context object with the following properties:
+  - `awsRequestId` (Node.js), `aws_request_id` (Python / Ruby) - random GUID string, does not emulate AWS UUID4 request IDs
+  - `functionName` (Node.js), `function_name` (Python / Ruby) - identifiable function name string prefixed by `sandbox-`; does not use live production AWS CFN GUIDs
+  - `functionVersion` (Node.js), `function_version` (Python / Ruby) - will always be `$LATEST`
+  - `invokedFunctionArn` (Node.js), `invoked_function_arn` (Python / Ruby) - always `sandbox`
+  - `memoryLimitInMB` (Node.js), `memory_limit_in_mb` (Python / Ruby) - your Lambda's configured memory amount
+
+
+### Fixed
+
+- Restored `ARC_INTERNAL` env var in Lambda invocations for Arc Functions
+- Restored userland env vars to `@sandbox-startup` scripts; thanks @reconbot!
+- Fixed case where `@ws` with no `@http` or `@static` would fail to start up
+
+---
+
+## [4.1.1] 2021-09-30
+
+### Changed
+
+- Restored missing ARC_SANDBOX_PATH_TO_STATIC in Lambda env vars for manual ASAP use; fixes #1231, thanks @andybee!
+
+---
+
 ## [4.1.0] 2021-09-15
 
 ### Added

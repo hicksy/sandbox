@@ -23,7 +23,7 @@ function runTests (runType) {
   })
 
   test(`${mode} get /`, t => {
-    t.plan(16)
+    t.plan(17)
     tiny.get({
       url
     }, function _got (err, result) {
@@ -41,6 +41,13 @@ function runTests (runType) {
           pathParameters: null,
           body: null,
           isBase64Encoded: false,
+          context: {
+            awsRequestId: true, // Just check for presence
+            functionName: 'sandbox-get-index',
+            functionVersion: '$LATEST',
+            invokedFunctionArn: 'sandbox',
+            mem: 1152,
+          }
         })
       }
     })
@@ -121,6 +128,31 @@ function runTests (runType) {
     })
   })
 
+  test(`${mode} get /nodejs14.x`, t => {
+    t.plan(16)
+    let path = '/nodejs14.x'
+    tiny.get({
+      url: url + path
+    }, function _got (err, result) {
+      if (err) t.fail(err)
+      else {
+        checkResult(t, result.body, {
+          message: 'Hello from get /nodejs14.x (running nodejs14.x)',
+          resource: path,
+          path,
+          httpMethod: 'GET',
+          headers: '🤷🏽‍♀️',
+          multiValueHeaders: '🤷🏽‍♀️',
+          queryStringParameters: null,
+          multiValueQueryStringParameters: null,
+          pathParameters: null,
+          body: null,
+          isBase64Encoded: false,
+        })
+      }
+    })
+  })
+
   test(`${mode} get /nodejs12.x`, t => {
     t.plan(16)
     let path = '/nodejs12.x'
@@ -146,58 +178,8 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /nodejs10.x`, t => {
-    t.plan(16)
-    let path = '/nodejs10.x'
-    tiny.get({
-      url: url + path
-    }, function _got (err, result) {
-      if (err) t.fail(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /nodejs10.x (running nodejs10.x)',
-          resource: path,
-          path,
-          httpMethod: 'GET',
-          headers: '🤷🏽‍♀️',
-          multiValueHeaders: '🤷🏽‍♀️',
-          queryStringParameters: null,
-          multiValueQueryStringParameters: null,
-          pathParameters: null,
-          body: null,
-          isBase64Encoded: false,
-        })
-      }
-    })
-  })
-
-  test(`${mode} get /nodejs8.10`, t => {
-    t.plan(16)
-    let path = '/nodejs8.10'
-    tiny.get({
-      url: url + path
-    }, function _got (err, result) {
-      if (err) t.fail(err)
-      else {
-        checkResult(t, result.body, {
-          message: 'Hello from get /nodejs8.10 (running nodejs8.10)',
-          resource: path,
-          path,
-          httpMethod: 'GET',
-          headers: '🤷🏽‍♀️',
-          multiValueHeaders: '🤷🏽‍♀️',
-          queryStringParameters: null,
-          multiValueQueryStringParameters: null,
-          pathParameters: null,
-          body: null,
-          isBase64Encoded: false,
-        })
-      }
-    })
-  })
-
   test(`${mode} get /python3.8`, t => {
-    t.plan(16)
+    t.plan(17)
     let path = '/python3.8'
     tiny.get({
       url: url + path
@@ -216,6 +198,13 @@ function runTests (runType) {
           pathParameters: null,
           body: null,
           isBase64Encoded: false,
+          context: {
+            aws_request_id: true, // Just check for presence
+            function_name: 'sandbox-get-python3_8',
+            function_version: '$LATEST',
+            invoked_function_arn: 'sandbox',
+            memory_limit_in_mb: 1152,
+          }
         })
       }
     })
@@ -271,16 +260,16 @@ function runTests (runType) {
     })
   })
 
-  test(`${mode} get /ruby2.5`, t => {
-    t.plan(16)
-    let path = '/ruby2.5'
+  test(`${mode} get /ruby2.7`, t => {
+    t.plan(17)
+    let path = '/ruby2.7'
     tiny.get({
       url: url + path
     }, function _got (err, result) {
       if (err) t.fail(err)
       else {
         checkResult(t, result.body, {
-          message: 'Hello from get /ruby2.5 (running ruby2.5)',
+          message: 'Hello from get /ruby2.7 (running ruby2.7)',
           resource: path,
           path,
           httpMethod: 'GET',
@@ -291,6 +280,13 @@ function runTests (runType) {
           pathParameters: null,
           body: null,
           isBase64Encoded: false,
+          context: {
+            aws_request_id: true, // Just check for presence
+            function_name: 'sandbox-get-ruby2_7',
+            function_version: '$LATEST',
+            invoked_function_arn: 'sandbox',
+            memory_limit_in_mb: 1152,
+          }
         })
       }
     })

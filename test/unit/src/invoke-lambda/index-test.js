@@ -21,8 +21,9 @@ let invoke = proxyquire('../../../../src/invoke-lambda', {
 })
 let event = { something: 'happened' }
 let inventory = { inv: { app: 'hi' } }
+let ports = {}
 let userEnv = {}
-let params = { event, inventory, update, userEnv }
+let params = { event, inventory, update, userEnv, ports }
 let inv
 let get
 
@@ -46,7 +47,7 @@ test('Get inventory', t => {
 })
 
 test('Test runtime invocations', t => {
-  t.plan(27)
+  t.plan(24)
   let lambda
 
   lambda = get.http('get /')
@@ -57,28 +58,20 @@ test('Test runtime invocations', t => {
     t.equals(request, JSON.stringify(event), 'Default runtime received event')
   })
 
+  lambda = get.http('get /nodejs14.x')
+  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
+    if (err) t.fail(err)
+    t.equals(options.cwd, lambda.src, 'nodejs14.x passed correct path')
+    t.equals(timeout, 14000, 'nodejs14.x ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'nodejs14.x received event')
+  })
+
   lambda = get.http('get /nodejs12.x')
   invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
     t.equals(options.cwd, lambda.src, 'nodejs12.x passed correct path')
     t.equals(timeout, 12000, 'nodejs12.x ran with correct timeout')
     t.equals(request, JSON.stringify(event), 'nodejs12.x received event')
-  })
-
-  lambda = get.http('get /nodejs10.x')
-  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
-    if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'nodejs10.x passed correct path')
-    t.equals(timeout, 10000, 'nodejs10.x ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'nodejs10.x received event')
-  })
-
-  lambda = get.http('get /nodejs8.10')
-  invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
-    if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'nodejs8.10 passed correct path')
-    t.equals(timeout, 810000, 'nodejs8.10 ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'nodejs8.10 received event')
   })
 
   lambda = get.http('get /python3.8')
@@ -105,12 +98,12 @@ test('Test runtime invocations', t => {
     t.equals(request, JSON.stringify(event), 'python3.6 received event')
   })
 
-  lambda = get.http('get /ruby2.5')
+  lambda = get.http('get /ruby2.7')
   invoke({ lambda, ...params }, (err, { options, request, timeout }) => {
     if (err) t.fail(err)
-    t.equals(options.cwd, lambda.src, 'ruby2.5 passed correct path')
-    t.equals(timeout, 25000, 'ruby2.5 ran with correct timeout')
-    t.equals(request, JSON.stringify(event), 'ruby2.5 received event')
+    t.equals(options.cwd, lambda.src, 'ruby2.7 passed correct path')
+    t.equals(timeout, 25000, 'ruby2.7 ran with correct timeout')
+    t.equals(request, JSON.stringify(event), 'ruby2.7 received event')
   })
 
   lambda = get.http('get /deno')
@@ -182,7 +175,7 @@ test('Verify call counts from runtime invocations', t => {
   t.plan(5)
   t.equals(runtimes.asap, 1, 'ASAP called correct number of times')
   t.equals(runtimes.deno, 1, 'Deno called correct number of times')
-  t.equals(runtimes.node, 4 + 2, 'Node called correct number of times')
+  t.equals(runtimes.node, 5, 'Node called correct number of times')
   t.equals(runtimes.python, 3, 'Python called correct number of times')
   t.equals(runtimes.ruby, 1, 'Ruby called correct number of times')
   delete process.env.ARC_ENV
