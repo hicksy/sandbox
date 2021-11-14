@@ -6,8 +6,8 @@ let hydrate = require('@architect/hydrate')
 let series = require('run-series')
 let create = require('@architect/create')
 let { chars } = require('@architect/utils')
-let { env, maybeHydrate } = require('../lib')
-let {invokePluginFunction} = require('../invoke-lambda/_plugin')
+let { checkRuntimes, env, maybeHydrate } = require('../lib')
+let invokePluginFunction = require('../invoke-lambda/_plugin')
 let httpConfig = require('../http/_config')
 let prettyPrint = require('../http/_pretty-print')
 let startupScripts = require('./_startup-scripts')
@@ -159,6 +159,11 @@ module.exports = function _start (params, callback) {
         }
       }
       callback()
+    },
+
+    // Check runtime versions
+    function _checkRuntimes (callback) {
+      checkRuntimes(params, callback)
     }
   ],
   function _done (err) {

@@ -1,17 +1,15 @@
-/* eslint-disable semi */
-let {
-  projectSrc,
-  handlerFile,
-  handlerFunction,
-  shared,
-  views,
-} = JSON.parse(process.env.__ARC_CONFIG__);
-let context = JSON.parse(process.env.__ARC_CONTEXT__);
+/* eslint-enable semi */
+/* eslint semi: [ 'error', 'always' ] */
+let { __ARC_CONFIG__, __ARC_CONTEXT__ } = process.env;
+let { projectSrc, handlerFile, handlerFunction, shared, views } = JSON.parse(__ARC_CONFIG__);
+let context = JSON.parse(__ARC_CONTEXT__);
 let { join, sep } = require('path');
 let { existsSync: exists, readFileSync: read } = require('fs');
 let handler = './' + handlerFile;
 let fn = require(handler)[handlerFunction];
 let cwd = process.cwd();
+delete process.env.__ARC_CONFIG__;
+delete process.env.__ARC_CONTEXT__;
 
 function isPromise (obj) {
   return obj && typeof obj.then === 'function';
@@ -101,8 +99,9 @@ process.stdin.on('close', () => {
     let payload = err
       ? { name: err.name, message: err.message, stack: err.stack }
       : result;
-    if (payload) payload.__DEP_ISSUES__ = missing;
-    if (payload) payload.__DEP_DEBUG__ = debug;
+    let meta = { missing, debug, version: process.version };
+    /* Always output __ARC_META__ first */
+    console.log('__ARC_META__', JSON.stringify(meta), '__ARC_META_END__');
     console.log('__ARC__', JSON.stringify(payload), '__ARC_END__');
   }
 
@@ -117,4 +116,4 @@ process.stdin.on('close', () => {
   catch (err) {
     callback(err);
   }
-})
+});

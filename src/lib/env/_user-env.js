@@ -8,7 +8,7 @@ let { existsSync, readFileSync } = require('fs')
  * - e.g. if ARC_ENV=staging the Lambda env is populated by `@staging`, etc.
  */
 module.exports = function populateUserEnv (params, callback) {
-  let { cwd, update, inventory } = params
+  let { cwd, update, inventory, env } = params
   let { inv } = inventory
   let environment = process.env.ARC_ENV
   let setEnv = false // Ignore the second set of env vars if both .env + Arc prefs are found
@@ -83,7 +83,20 @@ module.exports = function populateUserEnv (params, callback) {
       return callback(error)
     }
   }
-  else if (!setEnv) varsNotFound(environment)
+  else if (!setEnv && !env) varsNotFound(environment)
+
+  if (env) {
+    Object.entries(env).forEach(entry => {
+      let [ key, value ] = entry
+      if (typeof value === 'string') userEnv[key] = value
+      else if (typeof value === 'undefined') delete userEnv[key]
+      else {
+        let error = `env option '${key}' parse error: ${new Error().stack}`
+        return callback(error)
+      }
+    })
+    print('testing', 'env option')
+  }
 
   // Wrap it up
   if (inv._project?.preferences?.sandbox?.useAWS || process.env.ARC_LOCAL) {

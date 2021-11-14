@@ -2,6 +2,48 @@
 
 ---
 
+## [4.3.1] 2021-11-13
+
+### Added
+
+- Added internal `ARC_SANDBOX` env var for Sandbox metadata in Lambda invocations
+
+
+### Fixed
+
+- Fixed upcasing all userland environment variables
+- Removed extraneous internal `__ARC*` environment variables from Lambda invocation
+
+---
+
+## [4.3.0] 2021-11-03
+
+### Added
+
+- Sandbox now immediately streams Lambda logs to the console instead of printing everything all at once upon completion of execution; thanks @andybee!
+- Added runtime mismatch warnings
+  - Example: Sandbox will warn if your `get /foo` Lambda is configured for Python 3.9 and your local machine uses Python 3.8
+- Added `runStartupCommands` setting to API options
+  - Defaults to `true`; setting `false` disables `prefs.arc @sandbox-startup` commands, which may be useful for local testing; thanks @reconbot!
+- Added `env` option to API allowing programmatic control (add, replace, delete) of Lambda environment variables during automated testing, thanks @actsone8!
+- Added internal Arc service mock for API Gateway Management API mock for managing WebSocket connections via `aws-sdk` calls; big thanks to @reconbot!
+
+
+### Changed
+
+- Sandbox will only ever print a given dependency issue one time, instead of upon each invocation
+- Removed support for bare `port` CLI flag (e.g. `arc sandbox port 12345`); Sandbox now requires either `-p` or `--port` for setting the port from the CLI
+
+---
+
+## [4.2.3] 2021-11-02
+
+### Changed
+
+- Added warnings for macOS Monterey port conflicts on 5000 and 7000
+
+---
+
 ## [4.2.2] 2021-10-20
 
 ### Changed
